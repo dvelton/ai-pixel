@@ -102,7 +102,7 @@ def main():
     p_train = subparsers.add_parser("train", help="Train a model from CSV data")
     p_train.add_argument("data", help="CSV file (features + label in last column)")
     p_train.add_argument("--output", "-o", default="model.png", help="Output PNG path (default: model.png)")
-    p_train.add_argument("--epochs", type=int, default=500, help="Training epochs (default: 500)")
+    p_train.add_argument("--epochs", type=int, default=2000, help="Training epochs (default: 2000)")
     p_train.add_argument("--lr", type=float, default=0.2, help="Learning rate (default: 0.2)")
 
     # Inspect

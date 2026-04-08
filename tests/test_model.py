@@ -42,10 +42,22 @@ def test_training_history():
     y = np.array([0, 1, 1, 1], dtype=float)  # OR gate (linearly separable)
 
     model = PixelModel(n_inputs=2)
-    model.train(X, y, epochs=200)
+    model.train(X, y, epochs=200, patience=0)
 
-    assert len(model.training_history) == 200
+    assert len(model.training_history) == 200, f"Got {len(model.training_history)}"
     assert model.training_history[-1] < model.training_history[0]
+
+
+def test_early_stopping():
+    """Training should stop early when the quantized pixel stabilizes."""
+    X = np.array([[0.1, 0.1], [0.9, 0.9]], dtype=float)
+    y = np.array([0, 1], dtype=float)
+
+    model = PixelModel(n_inputs=2)
+    model.train(X, y, epochs=2000, patience=200)
+
+    assert len(model.training_history) < 2000, "Expected early stopping to trigger"
+    assert model.accuracy(X, y) == 1.0
 
 
 def test_predict_proba_range():

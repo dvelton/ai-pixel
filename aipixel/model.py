@@ -52,16 +52,18 @@ class PixelModel:
         z = X @ self._weights + self._bias
         return _sigmoid(z)
 
-    def train(self, X, y, epochs=500, lr=0.2, verbose=False):
+    def train(self, X, y, epochs=2000, lr=0.2, verbose=False, *, patience=200):
         """
         Train the model on labeled data.
 
         Args:
             X: Input features, shape (n_samples, n_inputs). Should be normalized to [0, 1].
             y: Binary labels, shape (n_samples,). Values should be 0 or 1.
-            epochs: Number of training iterations.
+            epochs: Maximum number of training iterations.
             lr: Learning rate.
             verbose: Print loss every 50 epochs.
+            patience: Stop early if the quantized pixel bytes are unchanged for this many
+                consecutive epochs. Set to 0 or None to disable. Keyword-only.
 
         Returns:
             self (for chaining).
@@ -76,6 +78,9 @@ class PixelModel:
 
         n = len(y)
         self._train_history = []
+
+        last_pixel = None
+        stable_count = 0
 
         for epoch in range(epochs):
             # Forward pass
@@ -98,6 +103,19 @@ class PixelModel:
             # Project back to feasible region [-4, 4]
             self._weights = np.clip(self._weights, -WEIGHT_MAX, WEIGHT_MAX)
             self._bias = np.clip(self._bias, -WEIGHT_MAX, WEIGHT_MAX)
+
+            # Early stop when the quantized pixel output has stabilized
+            if patience:
+                current_pixel = encode_weights(self._weights, self._bias)
+                if current_pixel == last_pixel:
+                    stable_count += 1
+                    if stable_count >= patience:
+                        if verbose:
+                            print(f"Pixel stable for {patience} epochs, stopping at epoch {epoch}")
+                        break
+                else:
+                    stable_count = 0
+                    last_pixel = current_pixel
 
         self._trained = True
         return self

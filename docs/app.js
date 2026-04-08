@@ -370,7 +370,7 @@
     document.getElementById("btn-train").addEventListener("click", function () {
         const X = points.map(p => [p.x, p.y]);
         const y = points.map(p => p.label);
-        const epochs = parseInt(document.getElementById("epochs").value) || 500;
+        const epochs = parseInt(document.getElementById("epochs").value) || 2000;
         const lr = parseFloat(document.getElementById("lr").value) || 0.2;
 
         const model = createModel();
@@ -382,10 +382,27 @@
 
         let epoch = 0;
         const step = Math.max(1, Math.floor(epochs / 100));
+        const patience = 200;
+        let lastPixelKey = null;
+        let stableCount = 0;
+        let stopped = false;
 
         function animate() {
-            for (let i = 0; i < step && epoch < epochs; i++, epoch++) {
+            for (let i = 0; i < step && epoch < epochs && !stopped; i++, epoch++) {
                 trainStep(model, X, y, lr);
+
+                // Early stop when quantized pixel bytes stabilize
+                const px = modelToPixel(model);
+                const key = px[0] + "," + px[1] + "," + px[2];
+                if (key === lastPixelKey) {
+                    stableCount++;
+                    if (stableCount >= patience) {
+                        stopped = true;
+                    }
+                } else {
+                    stableCount = 0;
+                    lastPixelKey = key;
+                }
             }
 
             currentModel = model;
@@ -394,9 +411,12 @@
             const acc = accuracy(model, X, y);
             statusEl.textContent = `Epoch ${epoch}/${epochs} — accuracy: ${(acc * 100).toFixed(1)}%`;
 
-            if (epoch < epochs) {
+            if (epoch < epochs && !stopped) {
                 requestAnimationFrame(animate);
             } else {
+                if (stopped) {
+                    statusEl.textContent += " (converged)";
+                }
                 btn.disabled = false;
                 showResult(model, X, y);
             }
