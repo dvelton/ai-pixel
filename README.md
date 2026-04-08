@@ -13,13 +13,13 @@ Open the [interactive demo](https://dvelton.github.io/ai-pixel/) in your browser
 ## Install
 
 ```
-pip install ai-pixel
+pip install git+https://github.com/dvelton/ai-pixel.git
 ```
 
 Requires Python 3.9+. For visualization support:
 
 ```
-pip install ai-pixel[viz]
+pip install "ai-pixel[viz] @ git+https://github.com/dvelton/ai-pixel.git"
 ```
 
 ## Quick start
