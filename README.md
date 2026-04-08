@@ -33,7 +33,7 @@ X, y, meta = umbrella()
 
 # Train
 model = PixelModel(n_inputs=2)
-model.train(X, y, epochs=500)
+model.train(X, y)
 
 # The model is a pixel
 pixel = model.to_pixel()
@@ -93,7 +93,7 @@ plot_pixel(model)
 
 ```bash
 # Train from CSV (last column = label, all others = features)
-ai-pixel train data.csv --output model.png --epochs 500
+ai-pixel train data.csv --output model.png
 
 # Inspect a pixel model
 ai-pixel inspect model.png
@@ -123,7 +123,7 @@ from aipixel.datasets import xor
 
 X, y, meta = xor()
 model = PixelModel(n_inputs=2)
-model.train(X, y, epochs=500)
+model.train(X, y)
 print(f"XOR accuracy: {model.accuracy(X, y):.1%}")  # ~50% (random chance)
 ```
 
