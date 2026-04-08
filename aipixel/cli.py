@@ -103,7 +103,7 @@ def main():
     p_train.add_argument("data", help="CSV file (features + label in last column)")
     p_train.add_argument("--output", "-o", default="model.png", help="Output PNG path (default: model.png)")
     p_train.add_argument("--epochs", type=int, default=500, help="Training epochs (default: 500)")
-    p_train.add_argument("--lr", type=float, default=0.5, help="Learning rate (default: 0.5)")
+    p_train.add_argument("--lr", type=float, default=0.2, help="Learning rate (default: 0.2)")
 
     # Inspect
     p_inspect = subparsers.add_parser("inspect", help="Inspect a pixel model PNG")

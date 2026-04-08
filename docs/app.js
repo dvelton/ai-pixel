@@ -26,25 +26,19 @@
     }
 
     function createModel() {
-        return { uW: [0, 0], uB: 0, history: [] };
+        return { w: [0, 0], b: 0, history: [] };
     }
 
     function getWeights(model) {
-        return {
-            w: [WEIGHT_MAX * Math.tanh(model.uW[0]), WEIGHT_MAX * Math.tanh(model.uW[1])],
-            b: WEIGHT_MAX * Math.tanh(model.uB)
-        };
+        return { w: model.w, b: model.b };
     }
 
     function forward(model, x1, x2) {
-        const { w, b } = getWeights(model);
-        return sigmoid(w[0] * x1 + w[1] * x2 + b);
+        return sigmoid(model.w[0] * x1 + model.w[1] * x2 + model.b);
     }
 
     function trainStep(model, X, y, lr) {
         const n = y.length;
-        const { w, b } = getWeights(model);
-
         let dlW0 = 0, dlW1 = 0, dlB = 0;
         let loss = 0;
 
@@ -63,13 +57,14 @@
         dlW1 /= n;
         dlB /= n;
 
-        const dtW0 = WEIGHT_MAX * (1 - Math.tanh(model.uW[0]) ** 2);
-        const dtW1 = WEIGHT_MAX * (1 - Math.tanh(model.uW[1]) ** 2);
-        const dtB = WEIGHT_MAX * (1 - Math.tanh(model.uB) ** 2);
+        model.w[0] -= lr * dlW0;
+        model.w[1] -= lr * dlW1;
+        model.b -= lr * dlB;
 
-        model.uW[0] -= lr * dlW0 * dtW0;
-        model.uW[1] -= lr * dlW1 * dtW1;
-        model.uB -= lr * dlB * dtB;
+        // Project back to feasible region [-4, 4]
+        model.w[0] = Math.max(WEIGHT_MIN, Math.min(WEIGHT_MAX, model.w[0]));
+        model.w[1] = Math.max(WEIGHT_MIN, Math.min(WEIGHT_MAX, model.w[1]));
+        model.b = Math.max(WEIGHT_MIN, Math.min(WEIGHT_MAX, model.b));
 
         model.history.push(loss);
         return loss;
@@ -81,13 +76,10 @@
     }
 
     function pixelToModel(r, g, b) {
-        const w0 = byteToWeight(r);
-        const w1 = byteToWeight(g);
-        const bias = byteToWeight(b);
         const model = createModel();
-        model.uW[0] = Math.atanh(Math.max(-0.9999, Math.min(0.9999, w0 / WEIGHT_MAX)));
-        model.uW[1] = Math.atanh(Math.max(-0.9999, Math.min(0.9999, w1 / WEIGHT_MAX)));
-        model.uB = Math.atanh(Math.max(-0.9999, Math.min(0.9999, bias / WEIGHT_MAX)));
+        model.w[0] = byteToWeight(r);
+        model.w[1] = byteToWeight(g);
+        model.b = byteToWeight(b);
         return model;
     }
 
@@ -379,7 +371,7 @@
         const X = points.map(p => [p.x, p.y]);
         const y = points.map(p => p.label);
         const epochs = parseInt(document.getElementById("epochs").value) || 500;
-        const lr = parseFloat(document.getElementById("lr").value) || 0.5;
+        const lr = parseFloat(document.getElementById("lr").value) || 0.2;
 
         const model = createModel();
         currentModel = model;

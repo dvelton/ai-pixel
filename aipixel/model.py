@@ -2,7 +2,7 @@
 PixelModel: A single-neuron classifier that fits in one pixel.
 
 Trains via gradient descent with sigmoid activation and binary cross-entropy loss.
-Weights are bounded via 4*tanh(u) parameterization so they always fit in [-4, 4].
+Weights are bounded to [-4, 4] using projected gradient descent (clip after each step).
 The trained model encodes into the RGB values of a 1x1 PNG.
 """
 
@@ -32,34 +32,27 @@ class PixelModel:
         if n_inputs not in (1, 2, 3):
             raise ValueError("n_inputs must be 1, 2, or 3")
         self.n_inputs = n_inputs
-        # Unconstrained parameters (weights = 4*tanh(u))
-        self._u_weights = np.zeros(n_inputs)
-        self._u_bias = 0.0
+        self._weights = np.zeros(n_inputs)
+        self._bias = 0.0
         self._trained = False
         self._train_history = []
 
     @property
     def weights(self) -> np.ndarray:
-        """Bounded weights in [-4, 4]."""
-        return WEIGHT_MAX * np.tanh(self._u_weights)
+        """Weights in [-4, 4]."""
+        return self._weights.copy()
 
     @property
     def bias(self) -> float:
-        """Bounded bias in [-4, 4]."""
-        return WEIGHT_MAX * np.tanh(self._u_bias)
+        """Bias in [-4, 4]."""
+        return float(self._bias)
 
-    def _forward(self, X, u_weights=None, u_bias=None):
-        """Compute sigmoid output from unconstrained params."""
-        if u_weights is None:
-            u_weights = self._u_weights
-        if u_bias is None:
-            u_bias = self._u_bias
-        w = WEIGHT_MAX * np.tanh(u_weights)
-        b = WEIGHT_MAX * np.tanh(u_bias)
-        z = X @ w + b
+    def _forward(self, X):
+        """Compute sigmoid output."""
+        z = X @ self._weights + self._bias
         return _sigmoid(z)
 
-    def train(self, X, y, epochs=500, lr=0.5, verbose=False):
+    def train(self, X, y, epochs=500, lr=0.2, verbose=False):
         """
         Train the model on labeled data.
 
@@ -97,19 +90,14 @@ class PixelModel:
                 acc = np.mean((y_hat >= 0.5) == y)
                 print(f"Epoch {epoch:4d}  loss={loss:.4f}  acc={acc:.3f}")
 
-            # Backward pass (chain rule through tanh parameterization)
-            error = y_hat - y  # shape (n,)
+            # Gradient step
+            error = y_hat - y
+            self._weights -= lr * (X.T @ error) / n
+            self._bias -= lr * np.mean(error)
 
-            # Gradient w.r.t. unconstrained params
-            # dL/du = dL/dw * dw/du = dL/dw * 4*(1 - tanh^2(u))
-            dl_dw = (X.T @ error) / n
-            dl_db = np.mean(error)
-
-            dtanh_w = WEIGHT_MAX * (1 - np.tanh(self._u_weights) ** 2)
-            dtanh_b = WEIGHT_MAX * (1 - np.tanh(self._u_bias) ** 2)
-
-            self._u_weights -= lr * dl_dw * dtanh_w
-            self._u_bias -= lr * dl_db * dtanh_b
+            # Project back to feasible region [-4, 4]
+            self._weights = np.clip(self._weights, -WEIGHT_MAX, WEIGHT_MAX)
+            self._bias = np.clip(self._bias, -WEIGHT_MAX, WEIGHT_MAX)
 
         self._trained = True
         return self
@@ -166,10 +154,8 @@ class PixelModel:
         """
         weights, bias, detected_n = decode_weights(pixel_values, n_inputs=n_inputs)
         model = cls(n_inputs=detected_n)
-        # Set unconstrained params to match decoded weights
-        # w = 4*tanh(u) => u = atanh(w/4)
-        model._u_weights = np.arctanh(np.clip(weights / WEIGHT_MAX, -0.9999, 0.9999))
-        model._u_bias = np.arctanh(np.clip(bias / WEIGHT_MAX, -0.9999, 0.9999))
+        model._weights = weights.copy()
+        model._bias = float(bias)
         model._trained = True
         return model
 
