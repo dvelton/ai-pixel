@@ -27,4 +27,4 @@ try:
     from aipixel.viz import plot_decision_boundary
     plot_decision_boundary(model, X, y, meta)
 except ImportError:
-    print("\nInstall matplotlib for visualization: pip install ai-pixel[viz]")
+    print("\nInstall matplotlib for visualization: pip install matplotlib")

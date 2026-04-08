@@ -1,7 +1,7 @@
 """
 Visualization tools for ai-pixel models.
 
-Requires matplotlib (install with: pip install ai-pixel[viz])
+Requires matplotlib (install with: pip install matplotlib)
 """
 
 import numpy as np

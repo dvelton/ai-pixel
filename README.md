@@ -16,10 +16,10 @@ Open the [interactive demo](https://dvelton.github.io/ai-pixel/) in your browser
 pip install git+https://github.com/dvelton/ai-pixel.git
 ```
 
-Requires Python 3.9+. For visualization support:
+Requires Python 3.9+. For visualization support, also install matplotlib:
 
 ```
-pip install "ai-pixel[viz] @ git+https://github.com/dvelton/ai-pixel.git"
+pip install matplotlib
 ```
 
 ## Quick start
