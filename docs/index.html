@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ai-pixel — One pixel. Three weights. Real inference.</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ai-pixel</h1>
+        <p class="tagline">One pixel. Three weights. Real inference.</p>
+    </header>
+
+    <main>
+        <section class="intro">
+            <p>Train a real AI model and watch it collapse into a single pixel. The pixel's RGB values <em>are</em> the model's weights. Download it as a 1x1 PNG. Load it back. Run predictions. The pixel is the AI.</p>
+        </section>
+
+        <div class="workspace">
+            <div class="canvas-panel">
+                <div class="canvas-header">
+                    <h2>Training Data</h2>
+                    <div class="canvas-controls">
+                        <button id="btn-class-0" class="class-btn class-0-btn active" title="Place Class 0 points">Class 0</button>
+                        <button id="btn-class-1" class="class-btn class-1-btn" title="Place Class 1 points">Class 1</button>
+                        <button id="btn-clear" class="btn-secondary" title="Clear all data points">Clear</button>
+                    </div>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="canvas" width="400" height="400"></canvas>
+                    <div class="axis-label axis-x">Feature 1</div>
+                    <div class="axis-label axis-y">Feature 2</div>
+                </div>
+                <div class="canvas-footer">
+                    <span id="point-count">0 points</span>
+                    <span class="hint">Click to place points. Toggle class above.</span>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h2>Train</h2>
+                    <div class="param-row">
+                        <label for="epochs">Epochs</label>
+                        <input type="number" id="epochs" value="500" min="10" max="5000" step="10">
+                    </div>
+                    <div class="param-row">
+                        <label for="lr">Learning rate</label>
+                        <input type="number" id="lr" value="0.5" min="0.01" max="5" step="0.01">
+                    </div>
+                    <button id="btn-train" class="btn-primary" disabled>Train Model</button>
+                    <div id="training-status" class="status"></div>
+                </div>
+
+                <div class="control-group" id="result-section" style="display: none;">
+                    <h2>Your AI Pixel</h2>
+                    <div class="pixel-reveal">
+                        <div id="pixel-swatch"></div>
+                        <div class="pixel-info">
+                            <div id="pixel-rgb" class="pixel-detail"></div>
+                            <div id="pixel-hex" class="pixel-detail"></div>
+                            <div id="pixel-weights" class="pixel-detail"></div>
+                            <div id="pixel-accuracy" class="pixel-detail"></div>
+                        </div>
+                    </div>
+                    <button id="btn-download" class="btn-primary">Download Pixel (1x1 PNG)</button>
+                </div>
+
+                <div class="control-group" id="predict-section" style="display: none;">
+                    <h2>Predict</h2>
+                    <div id="hover-readout" class="hover-readout">Hover over the canvas to see live predictions</div>
+                    <div class="predict-inputs">
+                        <div class="param-row">
+                            <label id="predict-label-1" for="predict-x1">Feature 1</label>
+                            <input type="number" id="predict-x1" value="0.5" min="0" max="1" step="0.01">
+                        </div>
+                        <div class="param-row">
+                            <label id="predict-label-2" for="predict-x2">Feature 2</label>
+                            <input type="number" id="predict-x2" value="0.5" min="0" max="1" step="0.01">
+                        </div>
+                        <button id="btn-predict" class="btn-primary">Predict</button>
+                        <div id="predict-result" class="predict-result"></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h2>Load a Pixel</h2>
+                    <div id="drop-zone" class="drop-zone">
+                        <p>Drag a 1x1 PNG here</p>
+                        <p class="hint">or click to browse</p>
+                        <input type="file" id="file-input" accept=".png" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h2>Examples</h2>
+                    <div class="example-buttons">
+                        <button class="btn-example" data-example="umbrella">Umbrella</button>
+                        <button class="btn-example" data-example="sunscreen">Sunscreen</button>
+                        <button class="btn-example" data-example="escalate">Escalate Ticket</button>
+                        <button class="btn-example" data-example="xor">XOR (Unsolvable)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="loss-section" id="loss-section" style="display: none;">
+            <h2>Training Loss</h2>
+            <canvas id="loss-canvas" width="700" height="200"></canvas>
+        </section>
+
+        <section class="about">
+            <h2>What is this?</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3>A real trained model</h3>
+                    <p>This runs actual gradient descent with sigmoid activation and binary cross-entropy loss. The model learns weights from your data through real optimization, not hardcoded rules.</p>
+                </div>
+                <div class="about-card">
+                    <h3>Encoded in RGB</h3>
+                    <p>A 2-input classifier has 3 parameters: two weights and a bias. Each is quantized to 8 bits and mapped to one color channel. R = weight 1, G = weight 2, B = bias. The pixel is the model.</p>
+                </div>
+                <div class="about-card">
+                    <h3>The tracking pixel, inverted</h3>
+                    <p>Tracking pixels are invisible images that phone home for surveillance. An AI pixel inverts that: intelligence baked into the pixel itself. No server call. No data leaving. The pixel decides.</p>
+                </div>
+                <div class="about-card">
+                    <h3>Honest about limits</h3>
+                    <p>A single neuron draws a straight line. It can't learn XOR or any pattern that isn't linearly separable. Try the XOR example above to see it fail. That's why deeper networks exist.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            <a href="https://github.com/dvelton/ai-pixel">GitHub</a>
+            · pip install ai-pixel
+        </p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
