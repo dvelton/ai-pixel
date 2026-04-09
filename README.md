@@ -8,7 +8,7 @@ Load that pixel later to run predictions. The pixel is the model.
 
 ## Try it
 
-Open the [interactive demo](https://dvelton.github.io/ai-pixel/) in your browser. Click to place data points, hit Train, and watch the model collapse into a single colored pixel you can download.
+Open the [demo](https://dvelton.github.io/ai-pixel/) in your browser. Click to place data points, hit Train, and watch the model collapse into a single colored pixel you can download.
 
 ## Install
 
