@@ -6,6 +6,8 @@ ai-pixel takes your data, runs actual gradient descent to learn a classifier, th
 
 Load that pixel later to run predictions. The pixel is the model.
 
+![ai-pixel demo showing training data, a one-pixel PNG model, and a prediction](docs/assets/readme-hero.png)
+
 ## Try it
 
 Open the [demo](https://dvelton.github.io/ai-pixel/) in your browser. Click to place data points, hit Train, and watch the model collapse into a single colored pixel you can download.
